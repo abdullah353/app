@@ -13,5 +13,7 @@
 
 Route::get('/', function()
 {
-	return View::make('hello');
+	return Redirect::action('CodesController@index');
 });
+
+Route::resource('codes','CodesController');
