@@ -17,3 +17,4 @@ Route::get('/', function()
 });
 
 Route::resource('codes','CodesController');
+Route::resource('images','ImageController');
