@@ -78,6 +78,7 @@
               <li>{{ HTML::linkAction('CodesController@create','Create New Codes') }}</li>
             </ul>
           </li>
+          <li>{{ HTML::link('users/login', 'Login',array('class'=>'blred')) }}</li>       
           <!-- <li class="active"><a href="index.html" class="blblue">Dashboard</a></li>
           <li>
             <a href="#" class="blgreen">Forms Stuff</a>
@@ -90,7 +91,6 @@
               <li><a href="wizard.html">Wizard</a></li>
             </ul>
           </li>
-          <li><a href="statistic.html" class="blred">Statistic</a></li>        
           <li>
             <a href="#" class="bldblue">Tables</a>
             <div class="open"></div>
