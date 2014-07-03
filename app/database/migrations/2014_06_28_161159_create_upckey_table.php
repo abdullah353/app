@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateImagesTable extends Migration {
+class CreateUpckeyTable extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -12,12 +12,12 @@ class CreateImagesTable extends Migration {
 	 */
 	public function up()
 	{
-    Schema::create('images',function($col){
-      $col->increments('id');
-      $col->string('origurl');
-      $col->string('origthumb');
-      $col->integer('extra')->unsigned();
-    });
+		Schema::create('upckeys', function(Blueprint $table)
+		{
+			$table->increments('id');
+			$table->string('code')->unique();
+			$table->timestamps();
+		});
 	}
 
 	/**
@@ -27,7 +27,7 @@ class CreateImagesTable extends Migration {
 	 */
 	public function down()
 	{
-    Schema::drop('images');
+		Schema::drop('upckeys');
 	}
 
 }
