@@ -45,11 +45,36 @@ class UsersController extends BaseController {
 	}
 
 	public function getDashboard() {
-		return View::make('users.dashboard');
+		$items = array();
+		$hasitems = false;
+		if(Input::get('from') && Input::get('to')){
+			$cal = new Ebay;
+		 	$sessionIdXml = $cal->GetSellerList(Input::get('from'),Input::get('to'),20,1);
+	    $sessionIdResponse = $cal->parseXml($sessionIdXml);
+	    $respxml = simplexml_load_string($sessionIdXml);
+	    if($respxml->ReturnedItemCountActual > 0){
+	    	$tmpitems = (array) $respxml->ItemArray;
+	    	//echo gettype($tmpitems["Item"]);
+	    	if(gettype($tmpitems["Item"]) == "object") echo "single";
+	    	$items = ( (gettype($tmpitems["Item"]) != "object") )?(array) $tmpitems["Item"]: $tmpitems;
+	    	$hasitems = true;
+	    }else{
+	    	//$items = (array) $respxml->ItemArray;
+	    	echo "eeeeeeeeeeeFNOONASD";
+	    }
+	    //print_r($itemsxml);
+	    //echo json_encode($items);
+	   	//echo json_encode($respxml);
+	  }
+		return View::make('users.dashboard')->with('items',$items)->with('hasitems',$hasitems);
 	}
 
 	public function getLogout() {
 		Auth::logout();
 		return Redirect::to('users/login')->with('message', 'Your are now logged out!');
+	}
+	public function getItemsfetch(){
+		var_dump(Input::all());
+		return  "";
 	}
 }

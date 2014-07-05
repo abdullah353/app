@@ -13,11 +13,8 @@ class ItemsController extends BaseController {
 	 */
 	public function index()
 	{
-		$cal = new Ebay;
-	 	$sessionIdXml = $cal->GetSellerList("2014-01-20","2014-05-16",2,1);
-    $sessionIdResponse = $cal->parseXml($sessionIdXml);
-    $itemsxml = simplexml_load_string($sessionIdXml);
-		return View::make('items.main')->with('items',$itemsxml);
+		
+		return Item::all()->toJson();
 	}
 
 

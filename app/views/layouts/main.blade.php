@@ -15,6 +15,9 @@
     {{ HTML::style('css/ie.css') }}
     {{ HTML::script('js/plugins/other/lte-ie7.js') }}
   <![endif]-->
+    <script type='text/javascript' src='js/plugins/mcustomscrollbar/jquery.mCustomScrollbar.min.js'></script>    
+    
+  
   {{ HTML::script('js/plugins/jquery/jquery-1.9.1.min.js') }}
   {{ HTML::script('js/plugins/jquery/jquery-ui-1.10.1.custom.min.js') }}
   {{ HTML::script('js/plugins/jquery/jquery-migrate-1.1.1.min.js') }}
@@ -26,6 +29,12 @@
   {{ HTML::script('js/plugins/bootstrap/bootstrap.min.js') }}
 
   {{ HTML::script('js/plugins/cookies/jquery.cookies.2.2.0.min.js') }}
+
+  {{ HTML::script('js/plugins/uniform/jquery.uniform.min.js') }}
+  {{ HTML::script('js/plugins/select/select2.min.js') }}
+  {{ HTML::script('js/plugins/tagsinput/jquery.tagsinput.min.js') }}
+  {{ HTML::script('js/plugins/maskedinput/jquery.maskedinput-1.3.min.js') }}
+  {{ HTML::script('js/plugins/multiselect/jquery.multi-select.min.js') }}
 
   {{ HTML::script('js/plugins/jflot/jquery.flot.js') }}
   {{ HTML::script('js/plugins/jflot/jquery.flot.stack.js') }}
