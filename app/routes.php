@@ -13,5 +13,12 @@
 
 Route::get('/', function()
 {
-	return View::make('hello');
+	return Redirect::action('CodesController@index');
 });
+
+Route::resource('codes','CodesController');
+Route::controller('users','UsersController');
+
+Route::resource('items','ItemsController');
+Route::resource('orders','OrdersController');
+//Route::resource('images','ImageController');
