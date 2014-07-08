@@ -36,6 +36,24 @@
 
 	<div class="row-fluid content">
 		<div class="block-fluid">
+				<div class="row-form">
+						<div class="span12">
+							@if($errors->has())
+							  <div id="form-errors">
+							    <p>Following Errors Occured</p>
+							    <ul>
+							      @foreach($errors->all() as $error)
+							        <li>{{ $error }}</li>
+							      @endforeach
+							    </ul>
+							  </div> <!-- end form-errors -->
+							@endif						
+						</div>
+				</div>
+		</div>
+	</div>
+	<div class="row-fluid content">
+		<div class="block-fluid">
 			@foreach(array_chunk($items ,3) as $pitems)
 				<div class="row-form">
 					@foreach($pitems as $item)
@@ -51,7 +69,16 @@
 											<a href="#"><div class="icon"><span class="ico-cog"></span></div></a>
 											<ul class="dropdown-menu">
 												<li><a href="{{ URL::to('orders/' . $item->ItemID) }}">GetOrdersList</a></li>
-												<li><a href="#">AddTo Your Store</a></li>
+												<li>
+													{{ Form::open(array('url'=>'items')) }}
+													{{ Form::hidden('source', 'ebay') }}
+													{{ Form::hidden('source_id', $item->ItemID) }}
+													{{ Form::hidden('name', $item->Title) }}
+													{{ Form::hidden('description', 'Not Provided') }}
+													{{ Form::hidden('imageurl', $item->PictureDetails->PictureURL) }}
+													{{ Form::button('<span class="ico-plus icon-white"></span> Add to Your Store', array('type'=>'submit','class'=>'btn btn-mini btn-primary')) }}
+													{{ Form::close() }}
+												</li>
 												<li class="divider"></li>
 												<li><a href="#">Overview</a></li>
 											</ul>

@@ -14,7 +14,7 @@ class ItemsController extends BaseController {
 	public function index()
 	{
 		
-		return Item::all()->toJson();
+		return View::make('items.main')->with('items',Item::all()->load('images')->toArray());
 	}
 
 
@@ -57,31 +57,34 @@ class ItemsController extends BaseController {
 	public function store()
 	{
 	
-		//$validator = Validator::make(Input::all(), Item::$rules);
+		$validator = Validator::make(Input::all(), Item::$rules);
+
+    if($validator->fails()){
+    return Redirect::to('items/create')->withErrors($validator)->withInput();
+  	}
+		$sourceid = Input::get('source_id');
+		$source = Input::get('source');
+		$name = Input::get('name');
+		$desc = Input::get('description');
+		$imgurl = Input::get('imageurl');
+		$item = new Item(array(
+			'source_id'=> $sourceid,
+			'source'=> $source,
+			'name'=> $name,
+			'description'=> $desc,
+		));
 		
-		var_dump(Input::all());
-    if(true)
-    {
-    	$sourceid = Input::get('sourceid');
-    	$source = Input::get('source');
-    	$name = Input::get('name');
-    	$desc = Input::get('description');
-
-      $item = new Item(array(
-				'source_id'=> $sourceid,
-				'source'=> $source,
-				'name'=> $name,
-				'description'=> $desc,
-			));
-
-			$user = User::find(Auth::user()->id);
-			$item->user()->associate($user);
-
-			$item->save();
-			return Redirect::to('items');
-    }
-    return 'failed';
-
+		$inimg = new Image(array(
+			'origurl'=>$imgurl
+		));
+		
+		$user = User::find(Auth::user()->id);
+		$item->user()->associate($user);
+		$item->save();
+		
+		$item->images()->save($inimg);
+		
+		return Redirect::to('items');
 	}
 
 
@@ -129,7 +132,9 @@ class ItemsController extends BaseController {
 	 */
 	public function destroy($id)
 	{
-		//
+		$user = Item::find($id);
+		$user->delete();
+		return "Deleted Successfully";
 	}
 
 

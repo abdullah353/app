@@ -156,11 +156,11 @@
           </ul>
         </li>        
         <li>
-          <a href="#" class="button orange">
+          <a href="{{URL::to('/users/dashboard')}}" class="button orange">
             <div class="icon">
               <span class="ico-cloud"></span>
             </div>          
-            <div class="name">Other</div>
+            <div class="name">Dashboard</div>
           </a>                    
         </li>        
         <li>
