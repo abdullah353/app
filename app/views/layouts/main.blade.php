@@ -10,7 +10,6 @@
   <link rel="icon" type="image/ico" href="favicon.ico"/>
   
   {{ HTML::style('css/stylesheets.css') }}
-  {{ HTML::style('') }}
   <!--[if lte IE 7]>
     {{ HTML::style('css/ie.css') }}
     {{ HTML::script('js/plugins/other/lte-ie7.js') }}
@@ -58,7 +57,10 @@
   
   {{ HTML::script('js/plugins/fancybox/jquery.fancybox.pack.js') }}
   {{ HTML::script('js/plugins.js') }}
-  {{ HTML::script('js/charts.js') }}
+  <!-- HighCharts -->
+  {{ HTML::script('js/highcharts.js') }}
+  {{ HTML::script('js/highcharts-3d.js') }}
+  {{ HTML::script('js/modules/exporting.js') }}
   
   {{ HTML::script('js/actions.js') }}
 </head>
@@ -223,7 +225,9 @@
     <div class="modal-footer">      
       <button class="btn btn-primary" id="fcAddEventButton">Add</button>      
     </div>
-  </div>  
-  
+  </div>
+  <script type="text/javascript">
+    @yield('scripts')
+  </script>
 </body>
 </html>

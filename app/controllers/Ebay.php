@@ -230,14 +230,46 @@ class Ebay {
             $session = new eBaySession('GetOrderTransactions');
             //Build the request Xml string
             $requestXmlBody = '<?xml version="1.0" encoding="utf-8"?>
-																<GetOrderTransactionsRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-																  <RequesterCredentials>
-																    <eBayAuthToken>'.$this->userToken.'</eBayAuthToken>
-																  </RequesterCredentials>
-																  <OrderIDArray>
-																    <OrderID>'.$orderId.'</OrderID>
-																  </OrderIDArray>
-																</GetOrderTransactionsRequest>';
+                                                                <GetOrderTransactionsRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+                                                                  <RequesterCredentials>
+                                                                    <eBayAuthToken>'.$this->userToken.'</eBayAuthToken>
+                                                                  </RequesterCredentials>
+                                                                  <OrderIDArray>
+                                                                    <OrderID>'.$orderId.'</OrderID>
+                                                                  </OrderIDArray>
+                                                                </GetOrderTransactionsRequest>';
+            
+            //Create a new eBay session with all details pulled in from included keys.php
+            $responseXml = $session->sendHttpRequest($requestXmlBody);
+            
+            return $responseXml;
+    }
+
+    /**
+     * Use this call to requests the totals for the buying and selling reminders from the user's My eBay account.
+     * 
+     * @author Abdullah Bashir <mabdullah353@gmail.com>
+     * @date 03-07-2014
+     * @param type $userToken
+     * @param type $StartTimeFrom
+     * @param type $StartTimeTo
+     * @param type $EntriesPerPage
+     * @return type xml
+     */
+    
+    public function GetOrders($status = "Active",$days = 30)
+    {
+            $session = new eBaySession('GetOrders');
+            //Build the request Xml string
+            $requestXmlBody = '<?xml version="1.0" encoding="utf-8"?>
+																<GetOrders xmlns="urn:ebay:apis:eBLBaseComponents">
+																	<RequesterCredentials>
+																		<eBayAuthToken>'.$this->userToken.'</eBayAuthToken>
+																	</RequesterCredentials>
+																	<NumberOfDays>'.$days.'</NumberOfDays>
+																	<OrderRole>Seller</OrderRole>
+																	<OrderStatus>'.$status.'</OrderStatus>
+																</GetOrders>';
             
             //Create a new eBay session with all details pulled in from included keys.php
             $responseXml = $session->sendHttpRequest($requestXmlBody);

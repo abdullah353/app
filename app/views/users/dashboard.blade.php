@@ -7,8 +7,52 @@
   </div>
   <h1>Fetch Your Inventory From Server <small>You can only fetch your items from inventory by date And the date should not exceed 120 days limit</small></h1>
 </div><!-- end .page-header -->
+
+
+<div class="row-fluid">
+	<div class="row-form">
+		<div class="span12">
+			<div class="block">
+				<div class="head blue">
+					
+					<h5><span class="icon ico-pen-2"></span> Overview Of Previous Month</h5>
+				</div>
+				<div class="data-fluid">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Total Orders</th>
+								<th>Pending Orders</th>
+								<th>Completed Orders</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>{{ $totalOrders }}</td>
+								<td><span class="label label-important">{{ $incomplete }}</span></td>
+								<td><span class="label label-success">{{ $completed }}</span></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row-form">
+		<div class="span12">
+			<div id="container"></div>
+		</div>
+	</div>
+</div>
+<hr>
+
 {{ Form::open(array('action' => 'UsersController@getDashboard', 'method' => 'get')) }}
 <div class="row-fluid">
+	<div class="row-form">
+		<div class="span12">
+			<h1>Fetch Your Inventory From Server</h1>
+		</div>
+	</div>
 	<div class="row-form"><!-- new form row -->
 			<div class="span6"><!-- new form column -->
 				<span class="top">Fetch Items From</span><!-- top text line -->
@@ -100,4 +144,34 @@
 		</div><!-- .block-fluid -->
 	</div><!-- .content -->
 @endif
+@stop
+
+
+@section('scripts')
+$(function () {
+    // Set up the chart
+    var chart = new Highcharts.Chart({
+        chart: {
+            renderTo: 'container',
+            type: 'column',
+            margin: 75,
+            options3d: {
+                enabled: true,
+                alpha: 5,
+                beta: 15,
+                depth: 50,
+                viewDistance: 25
+            }
+        },
+        title: {
+            text: 'Displaying Items Soled in Last Month'
+        },
+        plotOptions: {
+            column: {
+                depth: 25
+            }
+        },
+        series: {{ $series }}
+    });
+});
 @stop

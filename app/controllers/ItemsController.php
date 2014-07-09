@@ -13,7 +13,20 @@ class ItemsController extends BaseController {
 	 */
 	public function index()
 	{
+		/*
+		$cal = new Ebay;
+	 	$sessionIdXml = $cal->GetOrders("All");
+    $sessionIdResponse = $cal->parseXml($sessionIdXml);
+    $xml = simplexml_load_string($sessionIdXml);
+		$json = json_encode($xml);
+		echo $json;
+   	//$obj = json_decode($json);
+   	
+   	
 		
+		
+    //var_dump($xml);
+		*/
 		return View::make('items.main')->with('items',Item::all()->load('images')->toArray());
 	}
 

@@ -8,7 +8,6 @@
   <h1>Your Local Invenotry <small>This is Your invenotory at application</small></h1>
 </div><!-- end .page-header -->
 
-
 <div class="row-fluid content">
 	<div class="block-fluid">
 		@foreach(array_chunk($items ,3) as $pitems)
