@@ -22,3 +22,5 @@ Route::controller('users','UsersController');
 Route::resource('items','ItemsController');
 Route::resource('orders','OrdersController');
 //Route::resource('images','ImageController');
+
+Route::controller('mws', 'MwsController');
