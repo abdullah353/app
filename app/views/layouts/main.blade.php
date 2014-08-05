@@ -90,6 +90,7 @@
             </ul>
           </li>
           <li>{{ HTML::link('users/login', 'Login',array('class'=>'blred')) }}</li>       
+          <li>{{ HTML::link('pictures', 'Pictures',array('class'=>'blgreen')) }}</li>       
           <!-- <li class="active"><a href="index.html" class="blblue">Dashboard</a></li>
           <li>
             <a href="#" class="blgreen">Forms Stuff</a>

@@ -46,9 +46,11 @@
 {{ Form::open(array('action' => 'MwsController@postExcel')) }}
 <div class="row-fluid content">
 	<div class="block-fluid">
+	<?php $i = 0; ?>
 		@foreach(array_chunk($orders,4) as $order)
 			<div class="row-form">
 				@foreach($order as $el)
+				<?php $i++; ?>
 					
 					<div class="span3">
 						<div class="block" id="sWidget_2" style="position: relative;">
@@ -81,6 +83,26 @@
 	               	PostalCode: {{ $el->ShippingAddress->PostalCode }}<br>
 	               	AddressLine1: {{ $el->ShippingAddress->AddressLine1 }}<br>
 	               	AddressLine2: {{ $el->ShippingAddress->AddressLine2 }}<br>
+<input type="hidden" name="order[{{ $i }}][CompanyID]" value="">
+<input type="hidden" name="order[{{ $i }}][OrderID]" value="{{ $i }}">
+<input type="hidden" name="order[{{ $i }}][SKU]" value="">
+<input type="hidden" name="order[{{ $i }}][Service]" value="">
+<input type="hidden" name="order[{{ $i }}][Name]" value="{{ $el->ShippingAddress->Name }}">
+<input type="hidden" name="order[{{ $i }}][Phone]" value="{{ $el->ShippingAddress->Phone }}">
+<input type="hidden" name="order[{{ $i }}][Street1]" value="{{ $el->ShippingAddress->AddressLine1 }}">
+<input type="hidden" name="order[{{ $i }}][Street2]" value="{{ $el->ShippingAddress->AddressLine2 }}">
+<input type="hidden" name="order[{{ $i }}][City]" value="{{ $el->ShippingAddress->City }}">
+<input type="hidden" name="order[{{ $i }}][State]" value="{{ $el->ShippingAddress->StateOrRegion }}">
+<input type="hidden" name="order[{{ $i }}][PostalCode]" value="{{ $el->ShippingAddress->PostalCode }}">
+<input type="hidden" name="order[{{ $i }}][Contents]" value="">
+<input type="hidden" name="order[{{ $i }}][Items]" value="{{ $el->NumberOfItemsUnshipped }}">
+<input type="hidden" name="order[{{ $i }}][Value]" value="">
+<input type="hidden" name="order[{{ $i }}][SignatureConfirmation]" value="">
+<input type="hidden" name="order[{{ $i }}][Units]" value="">
+<input type="hidden" name="order[{{ $i }}][Weight]" value="">
+<input type="hidden" name="order[{{ $i }}][Height]" value="">
+<input type="hidden" name="order[{{ $i }}][Width]" value="">
+<input type="hidden" name="order[{{ $i }}][Depth]" value="">
                	@endif
             </div>
         </div>

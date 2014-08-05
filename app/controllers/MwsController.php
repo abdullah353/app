@@ -138,7 +138,12 @@ class MwsController extends \BaseController {
   }
 
   public function postExcel(){
-  	return "POST";
+  	
+  	Excel::create('Filename', function($excel) {
+			$excel->sheet('Boxc', function($sheet) {
+	        $sheet->fromArray(Input::get('order'));
+	    });  		
+		})->export('csv');
   }
 }
 
