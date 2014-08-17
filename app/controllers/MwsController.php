@@ -131,6 +131,7 @@ class MwsController extends \BaseController {
 					// echo $currentasin."<br>";
 					if( isset( $matcheditem->Product ) ){
 						$products["".$currentasin] = array( "image"	=> preg_replace("/._(.*)?_./", ".", $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->SmallImage->URL)
+											,"smallimage" => $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->SmallImage->URL
 											,"height" => (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Height
 											,"width"	=> (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Width
 											,"length" => (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Length
@@ -220,9 +221,21 @@ class MwsController extends \BaseController {
 
 	public function postExcel(){
 		$maporder = Input::get('maporder');
-		$info = Excel::create( str_random(6), function($excel) {
+		$boxc = Excel::create( 'Boxc'.str_random(6), function($excel) {
 			$excel->sheet('Boxc', function($sheet) {
 					$sheet->fromArray(Input::get('order'));
+			});			
+		})->store('csv', public_path().'/excel', true);
+
+		$pfc = Excel::create( 'pfc'.str_random(6), function($excel) {
+			$excel->sheet('pfc', function($sheet) {
+					$sheet->fromArray(Input::get('pfc'));
+			});			
+		})->store('xls', public_path().'/excel', true);		
+
+		$shipmentconfirm = Excel::create( 'shipmentconfirmation'.str_random(6), function($excel) {
+			$excel->sheet('shipmentconfirmation', function($sheet) {
+					$sheet->fromArray(Input::get('shipmentconfirmation'));
 			});			
 		})->store('xls', public_path().'/excel', true);
 		
@@ -230,23 +243,26 @@ class MwsController extends \BaseController {
 			"Content-type"=>"text/html",
 			"Content-Disposition"=>"attachment;Filename=myfile.doc"
 		);
-		$content = '<html><head><meta charset="utf-8"></head><body>';
-		$content .= url('excel/'.$info['file'], $parameters = array(), $secure = null);
+		$content = '<html><head><meta charset="utf-8"></head><body style="font-size:10px;margin:0px;padding:0px;">';
+		$content .= 'BOXC: '.url('excel/'.$boxc['file'], $parameters = array(), $secure = null);
+		$content .= '<p></p>';
+		$content .= 'PFC: '.url('excel/'.$pfc['file'], $parameters = array(), $secure = null);
+		$content .= '<p></p>';
+		$content .= 'MWS: '.url('excel/'.$shipmentconfirm['file'], $parameters = array(), $secure = null);
+		$content .= '<p></p>';
 		$content .= "<table><thead><tr>";
-		$content .= "<td>Orderid</td><td>image</td><td>Quantity</td><td>Name</td><td>PostalCode</td><td>State</td><td>City</td><td>Phone</td><td>Street1</td><td>Street2</td>";
+		$content .= "<td>Orderid</td><td>image</td><td>QTY</td><td>Name</td><td>PostalCode</td><td>State::City</td><td>Phone</td><td>Street1::Street2</td>";
 		$content .= "</tr></thead><tbody>";
 		foreach ($maporder as $order) {
 			$content .= '<tr>';
 			$content .= "<td>".$order["OrderID"]."</td>";
-			$content .= "<td><img src=".$order["image"]." style='height:75px;width:75px;'></td>";
+			$content .= "<td><img src=".$order["image"]."></td>";
 			$content .= "<td>".$order["Items"]."</td>";
 			$content .= "<td>".$order["Name"]."</td>";
-			$content .= "<td>".$order["PostalCode"];
-			$content .= "<td>".$order["State"]."</td>";
-			$content .= "<td>".$order["City"]."</td>";
+			$content .= "<td>".$order["PostalCode"]."</td>";
+			$content .= "<td>".$order["StateCity"]."</td>";
 			$content .= "<td>".$order["Phone"]."</td>";
-			$content .= "<td>".$order["Street1"]."</td>";
-			$content .= "<td>".$order["Street2"]."</td>";
+			$content .= "<td>".$order["Streets"]."</td>";
 	 		$content .= '</tr>';
 		}
 		$content .= '</tbody></table>';

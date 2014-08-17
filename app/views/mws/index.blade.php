@@ -18,7 +18,7 @@
 	<div class="row-form"><!-- new form row -->
 			<div class="span6"><!-- new form column -->
 				<span class="top">Fetch Orders From</span><!-- top text line -->
-				<input name="from" type="text" class="datepicker" value="{{ date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-14, date("Y"))) }}" />	 
+				<input name="from" type="text" class="datepicker" value="{{ date("Y-m-d", mktime(0, 0, 0, date("m"), date("d"), date("Y"))) }}" />	 
 			</div>
 			<div class="span6"><!-- new form column -->
 				<span class="top">Other Details</span><!-- top text line --> 
@@ -122,16 +122,52 @@
 <input type="hidden" name="order[{{ $randOrder }}][Depth]" value="1">
 
 
+
+<input type="hidden" name="pfc[{{ $randOrder }}][Sales Record Number]" value="{{ $randOrder }}">
+<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Fullname]" value="{{ $el->ShippingAddress->Name }}">
+<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Company]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Address 1]" value="{{ $el->ShippingAddress->AddressLine1 }}">
+<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Address 2]" value="{{ $el->ShippingAddress->AddressLine2 }}">
+<input type="hidden" name="pfc[{{ $randOrder }}][Buyer City]" value="{{ $el->ShippingAddress->City }}">
+<input type="hidden" name="pfc[{{ $randOrder }}][Buyer State]" value="{{ $el->ShippingAddress->StateOrRegion }}">
+<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Zip]" value="{{ $el->ShippingAddress->PostalCode }}">
+<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Phone Number]" value="{{ $el->ShippingAddress->Phone }}">
+<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Country]" value="{{ $el->ShippingAddress->CountryCode }}">
+<input type="hidden" name="pfc[{{ $randOrder }}][SKU]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Description EN]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Description CN]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][HS Code]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Quantity]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Sale Price]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Country of Manufacture]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Mark]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][weight]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Length]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Width]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Height]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][Shipping Service]" value="">
+<input type="hidden" name="pfc[{{ $randOrder }}][TrackingNo]" value="">
+																							
+
 <input type="hidden" name="maporder[{{ $randOrder }}][OrderID]" value="{{ $randOrder }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][image]" value="{{ $products["".$currentasin]['image'] }}">
+<input type="hidden" name="maporder[{{ $randOrder }}][image]" value="{{ $products["".$currentasin]['smallimage'] }}">
 <input type="hidden" name="maporder[{{ $randOrder }}][Items]" value="{{ $el->NumberOfItemsUnshipped }}">
 <input type="hidden" name="maporder[{{ $randOrder }}][PostalCode]" value="{{ $el->ShippingAddress->PostalCode }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][State]" value="{{ $el->ShippingAddress->StateOrRegion }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][City]" value="{{ $el->ShippingAddress->City }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][Street2]" value="{{ $el->ShippingAddress->AddressLine2 }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][Street1]" value="{{ $el->ShippingAddress->AddressLine1 }}">
+<input type="hidden" name="maporder[{{ $randOrder }}][StateCity]" value="{{ $el->ShippingAddress->StateOrRegion }}::{{ $el->ShippingAddress->City }}">
+<input type="hidden" name="maporder[{{ $randOrder }}][Streets]" value="{{ $el->ShippingAddress->AddressLine1 }}::{{ $el->ShippingAddress->AddressLine2 }}">
 <input type="hidden" name="maporder[{{ $randOrder }}][Phone]" value="{{ $el->ShippingAddress->Phone }}">
 <input type="hidden" name="maporder[{{ $randOrder }}][Name]" value="{{ $el->ShippingAddress->Name }}">
+
+
+<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][order-id]" value="{{ $el->AmazonOrderId }}">
+<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][order-item-id]" value="">
+<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][quantity]" value="">
+<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][ship-date]" value="{{  date('Y-m-d') }}">
+<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][carrier-code]" value="">
+<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][carrier-name]" value="">
+<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][tracking-number]" value="{{ $randOrder }}">
+<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][ship-method]" value="">
+							
 
 
 							 	@endif
