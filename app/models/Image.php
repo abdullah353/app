@@ -1,7 +1,10 @@
 <?php
 
 class Image extends Eloquent {
-  protected $fillable = array('origurl','origthumb','extra');
+  protected $fillable = array('item_id','origurl','copiurl','featurl');
+  
 
-
+  public function item(){
+    return $this->belongsTo('Item');
+  }
 }

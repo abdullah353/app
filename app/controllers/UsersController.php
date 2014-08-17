@@ -46,6 +46,8 @@ class UsersController extends BaseController {
 
 	public function getDashboard() {
 		$items = array();
+		$summary = $this->genSummary();
+
 		$hasitems = false;
 		if(Input::get('from') && Input::get('to')){
 			$cal = new Ebay;
@@ -66,15 +68,63 @@ class UsersController extends BaseController {
 	    //echo json_encode($items);
 	   	//echo json_encode($respxml);
 	  }
-		return View::make('users.dashboard')->with('items',$items)->with('hasitems',$hasitems);
+		return View::make('users.dashboard')->with('items',$items)->with('hasitems',$hasitems)
+				->with('totalOrders',$summary['totalorders'])->with('completed',$summary['completed'])
+				->with('incomplete',$summary['incomplete'])->with('series',json_encode($summary['series']));
+
 	}
 
 	public function getLogout() {
 		Auth::logout();
 		return Redirect::to('users/login')->with('message', 'Your are now logged out!');
 	}
-	public function getItemsfetch(){
-		var_dump(Input::all());
-		return  "";
+	public function genSummary(){
+		$summary = array();
+		$cal = new Ebay;
+	 	$sessionIdXml = $cal->GetOrders("All");
+    $sessionIdResponse = $cal->parseXml($sessionIdXml);
+    $respxml = simplexml_load_string($sessionIdXml);
+		//Getting Total Orders
+
+		//Getting Completed And Incompleted Orders
+		$ordlists = (array) $respxml->OrderArray;
+		$ordlist = $ordlists['Order'];
+		$ordcomp = 0;
+		$ordincomp = 0;
+		$itemsids = array();
+		foreach ($ordlist as $order) {
+			//print_r($order->OrderID);
+			if($order->OrderStatus == "Completed"){
+				$ordcomp++;
+			}else if($order->OrderStatus == "Active"){
+				$ordincomp++;
+			}
+			$tmporders = (array) $order->TransactionArray;
+			$tmporder =  $tmporders['Transaction'];
+			//$tmp = (array) $tmporder['0'];
+			if(gettype($tmporder) == 'array'){
+				foreach ($tmporder as $tmplist) {
+					array_push($itemsids, (int) $tmplist->Item->ItemID);
+				}
+			}else{
+				//echo $tmporder->Item->ItemID;	
+				array_push($itemsids, (int) $tmporder->Item->ItemID);
+			}
+
+
+		}
+		//print_r($itemsids);
+		//print_r(array_count_values ( $itemsids ));
+		//print_r($summary);
+		$series = array();
+		foreach (array_count_values ($itemsids) as $key => $value) {
+			array_push($series, array('name'=>$key,'data'=>json_decode("[".$value."]")));
+		}
+
+		$summary['totalorders'] = (int) $respxml->ReturnedOrderCountActual;
+		$summary['completed'] = $ordcomp;
+		$summary['incomplete'] = $ordincomp;
+		$summary['series'] = $series;
+		return $summary;
 	}
 }

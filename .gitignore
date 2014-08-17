@@ -7,3 +7,9 @@ composer.lock
 .DS_Store
 Thumbs.db
 /.project
+public/uplo*
+app/storage/excel
+app/storage/exports
+public/*.xls
+public/*.csv
+public/*.doc
