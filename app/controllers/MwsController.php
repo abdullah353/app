@@ -17,12 +17,16 @@ class MwsController extends \BaseController {
 		$token = null;
 		$status = Input::get('status');
 		if($origDate = Input::get('from')){
+			$account = Input::get('account');
+			$sellerid		= ($account == "1")? "A013695218D3GFTNCCXMX": "A1WBEEKNE10PYT";
+			$makrketid  =	($account == "1")? "ATVPDKIKX0DER": "A2EUQ1WTGCTBG2";
+
 			$newDate = gmdate("Y-m-d\TH:i:s\Z", strtotime($origDate));
 
 			$url	 = "https://mws.amazonservices.com/Orders/2013-09-01";
 			$url	.= "?Action=ListOrders";
-			$url	.= "&MarketplaceId.Id.1=ATVPDKIKX0DER";
-			$url	.= "&SellerId=A013695218D3GFTNCCXMX";
+			$url	.= "&MarketplaceId.Id.1=".$makrketid;
+			$url	.= "&SellerId=".$sellerid;
 			$url	.= "&SignatureVersion=2";
 			$url	.= "&SignatureMethod=HmacSHA256";
 			$url	.= "&CreatedAfter=".$newDate;
@@ -82,7 +86,7 @@ class MwsController extends \BaseController {
 				foreach ($orderlistchunk as $order) {
 					$url	= "https://mws.amazonservices.com/Orders/2013-09-01";
 					$url .= "?Action=ListOrderItems";
-					$url .= "&SellerId=A013695218D3GFTNCCXMX";
+					$url .= "&SellerId=".$sellerid;
 					$url .= "&AmazonOrderId=".$order->AmazonOrderId;
 					$url .= "&SignatureVersion=2";
 					$url .= "&SignatureMethod=HmacSHA256";
@@ -111,8 +115,8 @@ class MwsController extends \BaseController {
 			foreach (array_chunk($uniqueasins, 10) as $asins) {
 				$url	= "https://mws.amazonservices.com/Products/2011-10-01";
 				$url .= "?Action=GetMatchingProduct";
-				$url .= "&SellerId=A013695218D3GFTNCCXMX";
-				$url .= "&MarketplaceId=ATVPDKIKX0DER";
+				$url .= "&SellerId=".$sellerid;
+				$url .= "&MarketplaceId=".$makrketid;
 				$url .= "&SignatureVersion=2";
 				$url .= "&SignatureMethod=HmacSHA256";
 				for ($i=0; $i < count($asins); $i++) { 

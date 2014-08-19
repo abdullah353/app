@@ -16,7 +16,14 @@
 		</div>
 	</div>
 	<div class="row-form"><!-- new form row -->
-			<div class="span6"><!-- new form column -->
+			<div class="span3"><!-- new form column -->
+				<span class="top">Account</span><!-- top text line -->
+				<select name="account">
+					<option value="1">ghassanbashir2000@gmail.com</option>
+					<option value="2">xamz2000@stufff.dii</option>
+				</select>
+			</div>
+			<div class="span3"><!-- new form column -->
 				<span class="top">Fetch Orders From</span><!-- top text line -->
 				<input name="from" type="text" class="datepicker" value="{{ date("Y-m-d", mktime(0, 0, 0, date("m"), date("d"), date("Y"))) }}" />	 
 			</div>
