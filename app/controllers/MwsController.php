@@ -67,12 +67,12 @@ class MwsController extends \BaseController {
 			$resp = $this->MakeRequest($this->getRequest($sercretk,$url,$accessid));
 			//print_r($this->MakeRequest($this->getRequest($sercretk,$url,$accessid)));
 			//return View::make('mws.index');
-			echo "<pre>";
-			print_r($resp);
-			echo "</pre>";
+/////echo "<pre>";
+/////print_r($resp);
+/////echo "</pre>";
 			// return "";
 			$t = (array) $resp->ListOrdersResult;
-			if(!empty($t) && !empty($t->Orders)){
+			if(!empty($t)){
 				$token = (isset($t['NextToken']))? $t['NextToken']: null;
 				$orders = (array) $t['Orders'];
 				$orders = (isset($orders['Order'] ))? $orders['Order']:null;
@@ -98,8 +98,18 @@ class MwsController extends \BaseController {
 					$orderitems["".$order->AmazonOrderId] = $resp["ListOrderItemsResult"];
 
 					// Getting Original Orders
+/*					echo "<pre>";
+/////print_r($resp["ListOrderItemsResult"]["OrderItems"]);
+/////echo "</pre>";*/
+
 					foreach( $resp["ListOrderItemsResult"]["OrderItems"] as $orderitem ){
-						array_push($asinlist, $orderitem["ASIN"] );
+						if(isset($orderitem["ASIN"])){
+							array_push($asinlist, $orderitem["ASIN"] );
+						}else{
+							foreach ($orderitem as $deeporderitem) {
+								array_push($asinlist, $deeporderitem["ASIN"] );
+							}
+						}
 					}
 
 					// echo implode("&", $asinlist);
@@ -111,9 +121,17 @@ class MwsController extends \BaseController {
 					// array_push($order->orderitems, $resp->ListOrderItemsResult);//$order->orderitems = json_decode($json, true);
 					// break;
 				}
+/////echo "<h1>Total Grabbed ASIN</h1>";
+/////echo "<pre>";
+/////print_r($asinlist);
+/////echo "</pre>";
 				// echo "Next Ten";
 			}//'ASINList.ASIN.'.++$loopcounter.'='.
 			$uniqueasins = array_unique( $asinlist );
+/////echo "<h1>Uniqued ASIN</h1>";
+/////echo "<pre>";
+/////print_r($asinlist);
+/////echo "</pre>";
 			foreach (array_chunk($uniqueasins, 10) as $asins) {
 				$url	= "https://mws.amazonservices.com/Products/2011-10-01";
 				$url .= "?Action=GetMatchingProduct";
@@ -125,6 +143,10 @@ class MwsController extends \BaseController {
 					$url .= '&ASINList.ASIN.'.( $i+1 ).'='.$asins[$i];
 				}
 				// echo '<pre>';
+/////echo "<h1> Asin list url</h1>";
+/////echo "<pre>";
+/////echo $this->getRequest($sercretk,$url,$accessid, "2011-10-01" );
+/////echo "</pre>";
 				$xmlresp = $this->MakeRequest( $this->getRequest($sercretk,$url,$accessid, "2011-10-01" ) );
 				foreach ($xmlresp as $matcheditem) {
 					// print_r($matcheditem->attributes());
@@ -153,12 +175,17 @@ class MwsController extends \BaseController {
 			// print_r($orderlist);
 		}
 		//print_r($orderlist);
+/////echo "<h1>Orders Items</h1>";
+/////echo "<pre>";
+/////print_r($orderitems);
+/////echo "</pre>";
 		return View::make('mws.index')
 			->with('orders',$orderlist)
 			->with('token',$token)
 			->with('orderitems',$orderitems)
 			->with('products',$products)
 			->withInput(Input::all());
+			
 	}
 
 	/**
@@ -257,25 +284,33 @@ class MwsController extends \BaseController {
 		$content .= 'MWS: '.url('excel/'.$shipmentconfirm['file'], $parameters = array(), $secure = null);
 		$content .= '<p></p>';
 		$content .= "<table><thead><tr>";
-		$content .= "<td>Orderid</td><td>image</td><td>QTY</td><td>Name</td><td>PostalCode</td><td>State::City</td><td>Phone</td><td>Street1::Street2</td>";
+		$content .= "<td>Orderid</td><td>image</td><td>QTY</td><td>Name</td><td>Title</td>";
 		$content .= "</tr></thead><tbody>";
 		foreach ($maporder as $order) {
 			$content .= '<tr>';
 			$content .= "<td>".$order["OrderID"]."</td>";
-			$content .= "<td><img src=".$order["image"]."></td>";
+
+			if(isset($order["image"])){
+				$content .= "<td><img src=".$order["image"]."></td>";
+			}else{
+				$content .= "<td>";
+				foreach ($order["images"] as $image) {
+					$content .= "<img src=".$image.">";
+					$content .= "<p></p>";
+				}
+				$content .= "</td>";
+			}
+
 			$content .= "<td>".$order["Items"]."</td>";
 			$content .= "<td>".$order["Name"]."</td>";
-			$content .= "<td>".$order["PostalCode"]."</td>";
-			$content .= "<td>".$order["StateCity"]."</td>";
-			$content .= "<td>".$order["Phone"]."</td>";
-			$content .= "<td>".$order["Streets"]."</td>";
+			$content .= "<td>".$order["Title"]."</td>";
 	 		$content .= '</tr>';
 		}
 		$content .= '</tbody></table>';
 		$content .= '</body></html>';
 /*		echo '<pre>';
-		print_r(Input::all());
-		echo '</pre>';*/
+/////print_r(Input::all());
+/////echo '</pre>';*/
 		return Response::make($content,200, $headers);
 	}
 

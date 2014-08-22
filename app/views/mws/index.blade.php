@@ -69,11 +69,40 @@
 										AmountPaid: {{ $el->OrderTotal->Amount }}<br>
 										Shipped: {{ $el->NumberOfItemsShipped }} :: Unshipped: {{ $el->NumberOfItemsUnshipped }}<br>
 										@foreach( $orderitems["".$el->AmazonOrderId]["OrderItems"] as $orderitem )
-											<h6>{{ $orderitem["Title"] }}</h6>
-											<h6>Item Price {{ $orderitem["ItemPrice"]["Amount"] }}</h6>
-											<?php $currentasin = $orderitem["ASIN"]; ?>
+											<?php
+												$OrderedlistTitles = array();
+											?>
+											@if(isset($orderitem["Title"]))
+												<!-- Single Items Added in Cart -->
+												<h6>{{ $orderitem["Title"] }}</h6>
+												<h6>Item Price {{ $orderitem["ItemPrice"]["Amount"] }}</h6>
+												<?php 
+													$currentasin = $orderitem["ASIN"];
+													array_push($OrderedlistTitles,$orderitem["Title"]);
+												?>
+												<img src={{ $products["".$currentasin]["image"] }} >
+											@else
+												<!-- Multiple Orders Added in Cart -->
+												<?php 
+													$currentasin = "";
+													$asslinlist = array();
+													$OrderedlistQTY = array();
+												?>
+												@foreach( $orderitem as $suborderitem)
+													<h6>{{ $suborderitem["Title"] }}</h6>
+													<h6>Item Price {{ $suborderitem["ItemPrice"]["Amount"] }}</h6>
+													<h6>QuantityOrdered {{ $suborderitem["QuantityOrdered"] }}</h6>
+													<?php
+													 array_push($asslinlist,$suborderitem["ASIN"]);
+													 array_push($OrderedlistQTY,$suborderitem["QuantityOrdered"]);
+													 array_push($OrderedlistTitles,$suborderitem["Title"]);
+													?>
+												@endforeach
+													@foreach( $asslinlist as $singleasin)
+														<img src={{ $products["".$singleasin]["image"] }} >
+													@endforeach
+											@endif
 										@endforeach
-										<img src={{ $products["".$currentasin]["image"] }} >
 										<a href="#{{ $el->AmazonOrderId }}" role="button" class="btn" data-toggle="modal">OverView</a>
 									</div>
 								@endif
@@ -81,7 +110,7 @@
 					</div>
 					<div id="{{ $el->AmazonOrderId }}" class="modal hide fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
 						<div class="modal-header">
-								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
 								<h3 id="myModalLabel">{{ $el->AmazonOrderId }}</h3>
 						</div>
 						<div class="modal-body">
@@ -103,9 +132,17 @@
 								 	<pre>
 								 		{{ print_r( $orderitems["".$el->AmazonOrderId] ) }}
 								 	</pre><hr>
-								 	<pre>
-								 		{{ print_r( $products["".$currentasin] ) }}
-								 	</pre>
+								 	@if($currentasin != "")
+									 	<pre>
+									 		{{ print_r( $products["".$currentasin] ) }}
+									 	</pre>
+									@else
+										@foreach( $asslinlist as $singleasin)
+											<pre>
+										 		{{ print_r( $products["".$singleasin] ) }}
+										 	</pre>
+										@endforeach
+									@endif
 								 	<?php $randOrder = str_random(6); ?>
 <input type="hidden" name="order[{{ $randOrder }}][CompanyID]" value="838">
 <input type="hidden" name="order[{{ $randOrder }}][OrderID]" value="{{ $randOrder }}">
@@ -120,12 +157,22 @@
 <input type="hidden" name="order[{{ $randOrder }}][PostalCode]" value="{{ $el->ShippingAddress->PostalCode }}">
 <input type="hidden" name="order[{{ $randOrder }}][Contents]" value="">
 <input type="hidden" name="order[{{ $randOrder }}][Items]" value="{{ $el->NumberOfItemsUnshipped }}">
+@if(isset($orderitem['ItemPrice']['Amount']))
 <input type="hidden" name="order[{{ $randOrder }}][Value]" value="{{ $orderitem['ItemPrice']['Amount'] }}">
+@else
+<input type="hidden" name="order[{{ $randOrder }}][Value]" value="{{ $orderitem[0]['ItemPrice']['Amount'] }}">
+@endif
 <input type="hidden" name="order[{{ $randOrder }}][SignatureConfirmation]" value="0">
 <input type="hidden" name="order[{{ $randOrder }}][Units]" value="Metric">
-<input type="hidden" name="order[{{ $randOrder }}][Weight]" value="{{ $products[''.$currentasin]['weight'] }}">
-<input type="hidden" name="order[{{ $randOrder }}][Height]" value="{{ $products[''.$currentasin]['height'] }}">
-<input type="hidden" name="order[{{ $randOrder }}][Width]" value="{{ $products[''.$currentasin]['width'] }}">
+@if($currentasin != "")
+	<input type="hidden" name="order[{{ $randOrder }}][Weight]" value="{{ $products[''.$currentasin]['weight'] }}">
+	<input type="hidden" name="order[{{ $randOrder }}][Height]" value="{{ $products[''.$currentasin]['height'] }}">
+	<input type="hidden" name="order[{{ $randOrder }}][Width]" value="{{ $products[''.$currentasin]['width'] }}">
+@else
+	<input type="hidden" name="order[{{ $randOrder }}][Weight]" value="{{ $products[''.$asslinlist[0]]['weight'] }}">
+	<input type="hidden" name="order[{{ $randOrder }}][Height]" value="{{ $products[''.$asslinlist[0]]['height'] }}">
+	<input type="hidden" name="order[{{ $randOrder }}][Width]" value="{{ $products[''.$asslinlist[0]]['width'] }}">
+@endif
 <input type="hidden" name="order[{{ $randOrder }}][Depth]" value="1">
 
 
@@ -157,12 +204,16 @@
 																							
 
 <input type="hidden" name="maporder[{{ $randOrder }}][OrderID]" value="{{ $randOrder }}">
+@if($currentasin != '')
 <input type="hidden" name="maporder[{{ $randOrder }}][image]" value="{{ $products["".$currentasin]['smallimage'] }}">
 <input type="hidden" name="maporder[{{ $randOrder }}][Items]" value="{{ $el->NumberOfItemsUnshipped }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][PostalCode]" value="{{ $el->ShippingAddress->PostalCode }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][StateCity]" value="{{ $el->ShippingAddress->StateOrRegion }}::{{ $el->ShippingAddress->City }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][Streets]" value="{{ $el->ShippingAddress->AddressLine1 }}::{{ $el->ShippingAddress->AddressLine2 }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][Phone]" value="{{ $el->ShippingAddress->Phone }}">
+@else
+@foreach( $asslinlist as $singleasin)
+	<input type="hidden" name="maporder[{{ $randOrder }}][images][]" value="{{ $products["".$singleasin]['smallimage'] }}">
+@endforeach
+<input type="hidden" name="maporder[{{ $randOrder }}][Items]" value="{{ implode('/',$OrderedlistQTY) }}">
+@endif
+<input type="hidden" name="maporder[{{ $randOrder }}][Title]" value="{{ implode('<p></p>',$OrderedlistTitles) }}">
 <input type="hidden" name="maporder[{{ $randOrder }}][Name]" value="{{ $el->ShippingAddress->Name }}">
 
 
