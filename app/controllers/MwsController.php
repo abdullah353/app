@@ -67,17 +67,19 @@ class MwsController extends \BaseController {
 			$resp = $this->MakeRequest($this->getRequest($sercretk,$url,$accessid));
 			//print_r($this->MakeRequest($this->getRequest($sercretk,$url,$accessid)));
 			//return View::make('mws.index');
-
+			echo "<pre>";
+			print_r($resp);
+			echo "</pre>";
+			// return "";
 			$t = (array) $resp->ListOrdersResult;
-			if(!empty($t)){
+			if(!empty($t) && !empty($t->Orders)){
 				$token = (isset($t['NextToken']))? $t['NextToken']: null;
 				$orders = (array) $t['Orders'];
 				$orders = (isset($orders['Order'] ))? $orders['Order']:null;
 				if(gettype($orders) == "object"){array_push($orderlist, $orders);}else{$orderlist = $orders;}
 			}
 
-
-			//**
+			//*
 			$orderitems = array();
 			$allasin = array();
 			$allasin = array();
