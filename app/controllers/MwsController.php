@@ -42,7 +42,6 @@ class MwsController extends \BaseController {
         print_r($orderlist);
         echo "</pre>";
       }
-
       //array_splice($orderlist, 11);
       $orderitems = array();
       $allasin     = array();
@@ -290,9 +289,9 @@ class MwsController extends \BaseController {
     $pfc= array();
     $flat = array();
     $wordDoc = array();
-    $orderlist   = json_decode(Session::get('orders'));
-    $orderitems = json_decode(Session::get('orderitems'));
-    $products   = json_decode(Session::get('products'));
+    $orderlist   = json_decode(Session::pull('orders', 'default'));
+    $orderitems = json_decode(Session::pull('orderitems', 'default'));
+    $products   = json_decode(Session::get('products', 'default'));
     foreach($orderlist as $el){
       $id = $el->AmazonOrderId;
       //Cart Single Item Or Multiple Items Checks

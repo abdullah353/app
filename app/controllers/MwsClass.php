@@ -78,6 +78,7 @@ Class AmazonMws{
 	*/
 	public function ListOrders($from,$status = "Unshipped",$version = "2013-09-01"){
 		$newDate = gmdate("Y-m-d\TH:i:s\Z", strtotime($from));
+		$orderlist = array();
 		$url	 = $this->url."/Orders/".$version;
 		$url	.= "?Action=ListOrders";
 		$url	.= "&MarketplaceId.Id.1=".$this->marketid;
@@ -127,7 +128,11 @@ Class AmazonMws{
 			$token = (isset($t['NextToken']))? $t['NextToken']: null;
 			$orders = (array) $t['Orders'];
 			$orders = (isset($orders['Order'] ))? $orders['Order']:null;
-			if(gettype($orders) == "object"){array_push($orderlist, $orders);}else{$orderlist = $orders;}
+			if(gettype($orders) == "object"){
+				array_push($orderlist, $orders);
+			}else{
+				$orderlist = $orders;
+			}
 		}
 		return $orderlist;
 	}
