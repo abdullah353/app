@@ -117,10 +117,15 @@ class MwsController extends \BaseController {
 
 
   public function postExcel(){
-    $boxc = Input::get('boxc');
-    $pfc = Input::get('pfc');
-    $dublicate = array_intersect($boxc,$pfc);
+    $boxc = ( Input::get('boxc') != null )? Input::get('boxc'): array();
+    $pfc = ( Input::get('pfc') != null )? Input::get('pfc'): array();
+    
+    //Validation
+    if(!empty($boxc) && !empty($pfc)){
+      $dublicate = array_intersect($boxc,$pfc);
+    }
     if(!empty($dublicate)) return "You Have Selected This Order for both pfc and boxc Hit Back From Top and fix it ".json_encode($dublicate);
+    
     $mainRepo = $this->generateBoxc();
     $boxcCollection = array();
     $boxcFlatfile = array();
@@ -128,6 +133,11 @@ class MwsController extends \BaseController {
     $pfcCollection = array();
     $pfcFlatFile = array();
     $pfctemp = "";
+    $boxcfileurl = "";
+    $boxcflaturl = "";
+    $pfcfileurl = "";
+    $pfcflaturl = "";
+
     foreach ($boxc as $key => $value) {
       array_push($boxcCollection,$mainRepo['boxc'][$value]);  
       array_push($boxcFlatfile,$mainRepo['flatfile'][$value]);
@@ -211,57 +221,68 @@ class MwsController extends \BaseController {
     print_r($pfcFlatFile);
     echo "</pre>";
   }//Debugging
+    if(!empty($boxc)){
+      $boxcfile = Excel::create( 'Boxc'.str_random(6), function($excel) use($boxcCollection){
+        $excel->sheet('Boxc', function($sheet) use($boxcCollection){
+          $sheet->fromArray($boxcCollection);
+        });      
+      })->store('csv', public_path().'/excel', true);
+      $boxcfileurl = url('excel/'.$boxcfile['file'], $parameters = array(), $secure = null);
 
-    $boxcfile = Excel::create( 'Boxc'.str_random(6), function($excel) use($boxcCollection){
-      $excel->sheet('Boxc', function($sheet) use($boxcCollection){
-        $sheet->fromArray($boxcCollection);
-      });      
-    })->store('csv', public_path().'/excel', true);
+      $boxcflat = Excel::create( 'BoxcFlatFile'.str_random(6), function($excel) use($boxcFlatfile){
+        $excel->sheet('shipmentconfirmation', function($sheet) use($boxcFlatfile){
+          $sheet->fromArray($boxcFlatfile);
+        });      
+      })->store('csv', public_path().'/excel', true);
+      $boxcflaturl = url('excel/'.$boxcflat['file'], $parameters = array(), $secure = null);
+    }
 
-    $boxcflat = Excel::create( 'BoxcFlatFile'.str_random(6), function($excel) use($boxcFlatfile){
-      $excel->sheet('shipmentconfirmation', function($sheet) use($boxcFlatfile){
-        $sheet->fromArray($boxcFlatfile);
-      });      
-    })->store('csv', public_path().'/excel', true);
+    if(!empty($pfc)){
+      $pfcfile = Excel::create( 'pfc'.str_random(6), function($excel) use($pfcCollection){
+        $excel->sheet('pfc', function($sheet) use($pfcCollection){
+          $sheet->fromArray($pfcCollection);
+        });      
+      })->store('xls', public_path().'/excel', true);    
+      $pfcfileurl = url('excel/'.$pfcfile['file'], $parameters = array(), $secure = null);
 
-    $pfcfile = Excel::create( 'pfc'.str_random(6), function($excel) use($pfcCollection){
-      $excel->sheet('pfc', function($sheet) use($pfcCollection){
-        $sheet->fromArray($pfcCollection);
-      });      
-    })->store('xls', public_path().'/excel', true);    
-
-    $pfcflat = Excel::create( 'PfcFlatFile'.str_random(6), function($excel) use($pfcFlatFile){
-      $excel->sheet('shipmentconfirmation', function($sheet) use($pfcFlatFile){
-        $sheet->fromArray($pfcFlatFile);
-      });      
-    })->store('xls', public_path().'/excel', true);
-    
+      $pfcflat = Excel::create( 'PfcFlatFile'.str_random(6), function($excel) use($pfcFlatFile){
+        $excel->sheet('shipmentconfirmation', function($sheet) use($pfcFlatFile){
+          $sheet->fromArray($pfcFlatFile);
+        });      
+      })->store('xls', public_path().'/excel', true);
+      $pfcflaturl = url('excel/'.$pfcflat['file'], $parameters = array(), $secure = null);
+    }
     $headers = array(
       "Content-type"=>"text/html",
       "Content-Disposition"=>"attachment;Filename=myfile.doc"
     );
     $content  = '<html><head><meta charset="utf-8"></head><body style="font-size:10px;margin:0px;padding:0px;">';
-    $content .= 'BOXC: '.url('excel/'.$boxcfile['file'], $parameters = array(), $secure = null);
+    $content .= 'BOXC: '.$boxcfileurl;
     $content .= '<p></p>';
-    $content .= 'BOXC-Flat: '.url('excel/'.$boxcflat['file'], $parameters = array(), $secure = null);
+    $content .= 'BOXC-Flat: '.$boxcflaturl;
     $content .= '<p></p>';
-    $content .= 'PFC: '.url('excel/'.$pfcfile['file'], $parameters = array(), $secure = null);
+    $content .= 'PFC: '.$pfcfileurl;
     $content .= '<p></p>';
-    $content .= 'PFC-Flat: '.url('excel/'.$pfcflat['file'], $parameters = array(), $secure = null);
+    $content .= 'PFC-Flat: '.$pfcflaturl;
     $content .= '<p></p>';
-    $content .= '<h4>Generated Time '.date('l jS \of F Y h:i:s A').'</h4>';;
-    $content .= '<h2>BOXC ORDERS</h2>';
-    $content .= "<table><thead><tr>";
-    $content .= "<td>Orderid</td><td>image</td><td>QTY</td><td>Name</td><td>Title</td>";
-    $content .= "</tr></thead><tbody>";
-    $content .= $boxctemp;
-    $content .= '</tbody></table>';
-    $content .= '<h2>PFC ORDERS</h2>';
-    $content .= "<table><thead><tr>";
-    $content .= "<td>Orderid</td><td>image</td><td>QTY</td><td>Name</td><td>Title</td>";
-    $content .= "</tr></thead><tbody>";
-    $content .= $pfctemp;
-    $content .= '</tbody></table>';
+    $content .= '<h4>Generated Time '.date('l jS \of F Y h:i:s A').'</h4>';
+    if($boxctemp != ""){
+      $content .= '<h2>BOXC ORDERS</h2>';
+      $content .= "<table><thead><tr>";
+      $content .= "<td>Orderid</td><td>image</td><td>QTY</td><td>Name</td><td>Title</td>";
+      $content .= "</tr></thead><tbody>";
+      $content .= $boxctemp;
+      $content .= '</tbody></table>';
+    }
+    if($pfctemp != ""){
+      $content .= '<h2>PFC ORDERS</h2>';
+      $content .= "<table><thead><tr>";
+      $content .= "<td>Orderid</td><td>image</td><td>QTY</td><td>Name</td><td>Title</td>";
+      $content .= "</tr></thead><tbody>";
+      $content .= $pfctemp;
+      $content .= '</tbody></table>';
+    }
+
     $content .= '</body></html>';
 
     return Response::make($content,200, $headers);
@@ -346,7 +367,7 @@ class MwsController extends \BaseController {
       $boxc["Street2"] = "";
     }
     $boxc["City"] =  $el->ShippingAddress->City ;
-    $boxc["State"] =  $el->ShippingAddress->StateOrRegion ;
+    $boxc["State"] =  (isset($el->ShippingAddress->StateOrRegion))?$el->ShippingAddress->StateOrRegion: "";
     $boxc["PostalCode"] =  $el->ShippingAddress->PostalCode ;
     $boxc["Contents"] = "";
     $boxc["Items"] =  $el->NumberOfItemsUnshipped ;
@@ -376,7 +397,7 @@ class MwsController extends \BaseController {
       ,"Buyer Address 1"       => $el->ShippingAddress->AddressLine1
       ,"Buyer Address 2"       => (isset($el->ShippingAddress->AddressLine2))?$el->ShippingAddress->AddressLine2:""
       ,"Buyer City"            => $el->ShippingAddress->City
-      ,"Buyer State"           => $el->ShippingAddress->StateOrRegion
+      ,"Buyer State"           => (isset($el->ShippingAddress->StateOrRegion))?$el->ShippingAddress->StateOrRegion: ""
       ,"Buyer Zip"             => $el->ShippingAddress->PostalCode
       ,"Buyer Phone Number"    => $el->ShippingAddress->Phone
       ,"Buyer Country"         => $el->ShippingAddress->CountryCode
