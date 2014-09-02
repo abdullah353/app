@@ -27,7 +27,11 @@
 				<span class="top">Fetch Orders From</span><!-- top text line -->
 				<input name="from" type="text" class="datepicker" value="{{ date("Y-m-d", mktime(0, 0, 0, date("m"), date("d"), date("Y"))) }}" />	 
 			</div>
-			<div class="span6"><!-- new form column -->
+			<div class="span1"><!-- new form column -->
+				<span class="top">Limit Orders</span><!-- top text line -->
+				<input name="limit" type="number" value="30" style=" width: 40px; "/>	 
+			</div>
+			<div class="span5"><!-- new form column -->
 				<span class="top">Other Details</span><!-- top text line --> 
 				<select name="status">
 					<option value="all">All</option>

@@ -21,6 +21,8 @@ class MwsController extends \BaseController {
     $token = null;
     $accountid = Input::get('account');
     $status = Input::get('status');
+    $limit = Input::get('limit');
+    $limit = (isset($limit))?$limit: 16;
     if($origDate = Input::get('from')){
       //Congiuring Account to use
       $configgured = $this->service->setService($this->keys($accountid));
@@ -42,7 +44,7 @@ class MwsController extends \BaseController {
         print_r($orderlist);
         echo "</pre>";
       }
-      array_splice($orderlist, 25);
+      array_splice($orderlist, intval($limit));
       $orderitems = array();
       $allasin     = array();
       $allasin     = array();
@@ -189,12 +191,21 @@ class MwsController extends \BaseController {
 
       if(isset($order["image"])){
         $toarray = json_decode( json_encode($order["image"]) , true);
-        $boxctemp .= "<td><img src=".$toarray[0]."></td>";
+        if(gettype($toarray)=="string"){     
+          $boxctemp .= "<td><img src=".$toarray."></td>";
+        }else{
+          $boxctemp .= "<td><img src=".$toarray[0]."></td>";
+        }
+        // $boxctemp .= "<td><img src=".$toarray[0]."></td>";
       }else{
         $boxctemp .= "<td>";
         foreach ($order["images"] as $image) {
           $toarray = json_decode( json_encode($image) , true);
-          $boxctemp .= "<img src=".$toarray[0].">";
+          if(gettype($toarray)=="string"){     
+            $boxctemp .= "<img src=".$toarray.">";
+          }else{
+            $boxctemp .= "<img src=".$toarray[0].">";
+          }
           $boxctemp .= "<p></p>";
         }
         $boxctemp .= "</td>";
@@ -213,12 +224,21 @@ class MwsController extends \BaseController {
 
       if(isset($order["image"])){
         $toarray = json_decode( json_encode($order["image"]) , true);
-        $pfctemp .= "<td><img src=".$toarray[0]."></td>";
+        if(gettype($toarray)=="string"){     
+          $pfctemp .= "<td><img src=".$toarray."></td>";
+        }else{
+          $pfctemp .= "<td><img src=".$toarray[0]."></td>";
+        }
       }else{
         $pfctemp .= "<td>";
         foreach ($order["images"] as $image) {
           $toarray = json_decode( json_encode($image) , true);
-          $pfctemp .= "<img src=".$toarray[0].">";
+          if(gettype($toarray)=="string"){     
+            $pfctemp .= "<img src=".$toarray.">";
+          }else{
+            $pfctemp .= "<img src=".$toarray[0].">";
+          }
+          // $pfctemp .= "<img src=".$toarray[0].">";
           $pfctemp .= "<p></p>";
         }
         $pfctemp .= "</td>";
