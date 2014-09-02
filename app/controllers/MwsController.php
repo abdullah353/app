@@ -406,7 +406,7 @@ class MwsController extends \BaseController {
     $boxc["Service"] = "";
     $boxc["Name"] =  $el->ShippingAddress->Name ;
     $boxc["Phone"] =  $el->ShippingAddress->Phone ;
-    $boxc["Street1"] =  $el->ShippingAddress->AddressLine1 ;
+    $boxc["Street1"] =  ( isset($el->ShippingAddress->AddressLine1) )? $el->ShippingAddress->AddressLine1: "" ;
     if(isset($el->ShippingAddress->AddressLine2)){
       $boxc["Street2"] =  $el->ShippingAddress->AddressLine2 ;
     }else{
@@ -436,12 +436,12 @@ class MwsController extends \BaseController {
        "Sales Record Number"   => $randOrder
       ,"Buyer Fullname"        => $el->ShippingAddress->Name
       ,"Buyer Company"         => ""
-      ,"Buyer Address 1"       => $el->ShippingAddress->AddressLine1
+      ,"Buyer Address 1"       => ( isset($el->ShippingAddress->AddressLine1) )? $el->ShippingAddress->AddressLine1: ""
       ,"Buyer Address 2"       => (isset($el->ShippingAddress->AddressLine2))?$el->ShippingAddress->AddressLine2:""
       ,"Buyer City"            => $el->ShippingAddress->City
       ,"Buyer State"           => (isset($el->ShippingAddress->StateOrRegion))?$el->ShippingAddress->StateOrRegion: ""
       ,"Buyer Zip"             => $el->ShippingAddress->PostalCode
-      ,"Buyer Phone Number"    => $el->ShippingAddress->Phone
+      ,"Buyer Phone Number"    => ( isset($el->ShippingAddress->Phone) )? $el->ShippingAddress->Phone: ""
       ,"Buyer Country"         => $el->ShippingAddress->CountryCode
       ,"SKU"                   => ""
       ,"Description EN"        => ""
