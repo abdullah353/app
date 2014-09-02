@@ -66,7 +66,7 @@
 								</div>
 								@if(!empty($el->OrderTotal))
 									<div class="data dark">
-										<input type="checkbox" name="boxc[]" value="{{ $el->AmazonOrderId }}">ADD BOXC<br>
+										<input type="checkbox" checked="checked" name="boxc[]" value="{{ $el->AmazonOrderId }}">ADD BOXC<br>
 										<input type="checkbox" name="pfc[]" value="{{ $el->AmazonOrderId }}">ADD PFC<br>
 										
 										

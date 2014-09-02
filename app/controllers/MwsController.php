@@ -42,7 +42,7 @@ class MwsController extends \BaseController {
         print_r($orderlist);
         echo "</pre>";
       }
-      //array_splice($orderlist, 11);
+      array_splice($orderlist, 25);
       $orderitems = array();
       $allasin     = array();
       $allasin     = array();
@@ -60,6 +60,16 @@ class MwsController extends \BaseController {
               echo "</pre>";
             }
             $resp = json_decode(json_encode($xmlresp), true);
+            if(!isset($resp["ListOrderItemsResult"])){
+              if($this->mode == "developer"){
+                echo "<h1>ListOrderItemsResult Not Found in URL</h1>";
+                echo "<span>Class Name ".get_class($this)."</span>";
+                echo "<pre>";
+                print_r($resp);
+                echo "</pre>";
+              }
+              return;
+            }
             $orderitems["".$order->AmazonOrderId] = $resp["ListOrderItemsResult"];
             foreach( $resp["ListOrderItemsResult"]["OrderItems"] as $orderitem ){
               if(isset($orderitem["ASIN"])){
@@ -91,13 +101,45 @@ class MwsController extends \BaseController {
               }
             }
             if( isset( $matcheditem->Product ) ){
+              $origsrc = $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->SmallImage->URL;
+              if( isset($origsrc) && !empty($origsrc) ){
+                $image = preg_replace("/._(.*)?_./", ".", $origsrc);
+                $smallimage = $origsrc;
+                $height = (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Height;
+                $width = (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Width;
+                $length = (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Length;
+                $weight = (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Weight;
+              }else{
+                $image = "http://dummyimage.com/450x250/000/fff&text=".$currentasin;
+                $smallimage = "http://dummyimage.com/75x75/000/fff&text=".$currentasin;
+                $height = "";
+                $width = "";
+                $length = "";
+                $weight = ""; 
+              }
+
               $products["".$currentasin] = array(
-                       "image"  => preg_replace("/._(.*)?_./", ".", $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->SmallImage->URL)
-                      ,"smallimage" => (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->SmallImage->URL
-                      ,"height" => (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Height
-                      ,"width"  => (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Width
-                      ,"length" => (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Length
-                      ,"weight" => (string) $matcheditem->Product->AttributeSets->children('ns2', true)->ItemAttributes->PackageDimensions->Weight
+                       "image"  => $image
+                      ,"smallimage" => $smallimage
+                      ,"height" => $height
+                      ,"width"  => $width
+                      ,"length" => $length
+                      ,"weight" => $weight
+              );
+            }else{
+                $image = "http://dummyimage.com/450x250/fff/000&text=".$currentasin;
+                $smallimage = "http://dummyimage.com/75x75/fff/000&text=".$currentasin;
+                $height = "";
+                $width = "";
+                $length = "";
+                $weight = ""; 
+              $products["".$currentasin] = array(
+                 "image"  => $image
+                ,"smallimage" => $smallimage
+                ,"height" => $height
+                ,"width"  => $width
+                ,"length" => $length
+                ,"weight" => $weight
               );
             }
           }
@@ -146,11 +188,13 @@ class MwsController extends \BaseController {
       $boxctemp .= "<td>".$order["OrderID"].'<p></p>'.$value."</td>";
 
       if(isset($order["image"])){
-        $boxctemp .= "<td><img src=".$order["image"]."></td>";
+        $toarray = json_decode( json_encode($order["image"]) , true);
+        $boxctemp .= "<td><img src=".$toarray[0]."></td>";
       }else{
         $boxctemp .= "<td>";
         foreach ($order["images"] as $image) {
-          $boxctemp .= "<img src=".$image.">";
+          $toarray = json_decode( json_encode($image) , true);
+          $boxctemp .= "<img src=".$toarray[0].">";
           $boxctemp .= "<p></p>";
         }
         $boxctemp .= "</td>";
@@ -168,11 +212,13 @@ class MwsController extends \BaseController {
       $pfctemp .= "<td>".$order["OrderID"].'<p></p>'.$value."</td>";
 
       if(isset($order["image"])){
-        $pfctemp .= "<td><img src=".$order["image"]."></td>";
+        $toarray = json_decode( json_encode($order["image"]) , true);
+        $pfctemp .= "<td><img src=".$toarray[0]."></td>";
       }else{
         $pfctemp .= "<td>";
         foreach ($order["images"] as $image) {
-          $pfctemp .= "<img src=".$image.">";
+          $toarray = json_decode( json_encode($image) , true);
+          $pfctemp .= "<img src=".$toarray[0].">";
           $pfctemp .= "<p></p>";
         }
         $pfctemp .= "</td>";
@@ -374,11 +420,7 @@ class MwsController extends \BaseController {
     if(isset($orderitem->OrderItems->OrderItem->ItemPrice->Amount)){
       $boxc["Value"] =  $orderitem->OrderItems->OrderItem->ItemPrice->Amount;
     }else{
-      echo "<pre>";
-      print_r($orderitem);
-      echo "</pre>";
-      return "";
-      $boxc[$id]["Value"] =  $orderitem->OrderItem->ItemPrice->Amount;
+      $boxc["Value"] =  $orderitem->OrderItems->OrderItem[0]->ItemPrice->Amount;
     }
     $boxc["SignatureConfirmation"] = 0;
     $boxc["Units"] = "Metric";
