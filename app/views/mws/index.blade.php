@@ -61,20 +61,35 @@
 		@foreach(array_chunk($orders,4) as $order)
 			<div class="row-form">
 				@foreach($order as $el)
-				<?php $i++; ?>
+				<?php
+					$i++; 
+					$str = $el->PurchaseDate;
+					$str = strtotime(date("M d Y")) - (strtotime($str));
+					$days = floor($str/3600/24);
+					$hcolor = "green";
+					if($days >= 2){
+						$hcolor = "dblue";
+					}elseif ($days >= 4) {
+						$hcolor = "yellow";
+					}elseif ($days >= 7) {
+						$hcolor = "red";
+					}
+				?>
 					
 					<div class="span3">
 						<div class="block" id="sWidget_2" style="position: relative;">
-								<div class="head dblue">
+								<div class="head {{ $hcolor }}">
 									<h6>MWS OrderId: {{ $el->AmazonOrderId }}</h6>
 								</div>
 								@if(!empty($el->OrderTotal))
 									<div class="data dark">
-										<input type="checkbox" checked="checked" name="boxc[]" value="{{ $el->AmazonOrderId }}">ADD BOXC<br>
-										<input type="checkbox" name="pfc[]" value="{{ $el->AmazonOrderId }}">ADD PFC<br>
+										<input type="checkbox" checked="checked" class="boxcsel" name="boxc[]" value="{{ $el->AmazonOrderId }}">ADD BOXC<br>
+										<input type="checkbox" calss="pfcsel" name="pfc[]" value="{{ $el->AmazonOrderId }}">ADD PFC<br>
 										
 										
 										AmountPaid: {{ $el->OrderTotal->Amount }}<br>
+										Buy date: {{ $el->PurchaseDate }}<br>
+										Order Type: {{ $el->OrderType }}<br>
 										Shipped: {{ $el->NumberOfItemsShipped }} :: Unshipped: {{ $el->NumberOfItemsUnshipped }}<br>
 										@foreach( $orderitems["".$el->AmazonOrderId]["OrderItems"] as $orderitem )
 											<?php

@@ -26,24 +26,11 @@ class MwsController extends \BaseController {
     if($origDate = Input::get('from')){
       //Congiuring Account to use
       $configgured = $this->service->setService($this->keys($accountid));
-
-      if($this->mode == "developer"){
-        echo "<h1>Current Configuration Response</h1>";
-        echo "<span>Class Name ".get_class($this)."</span>";
-        echo "<pre>";
-        print_r($this->service->showConfig());
-        echo "</pre>";
-      }
+      $this->logit("Current Configuration Response", $this->service->showConfig(), "Class Name ".get_class($this));
       //Getting Orders BY attributes
       $orderlist = $this->service->ordersByAttributes($origDate,$status);
 
-      if($this->mode == "developer"){
-        echo "<h1>Orders By Attrutes</h1>";
-        echo "<span>Class Name ".get_class($this)."</span>";
-        echo "<pre>";
-        print_r($orderlist);
-        echo "</pre>";
-      }
+      $this->logit("Orders By Attrutes", $orderlist, "Class Name ".get_class($this));
       array_splice($orderlist, intval($limit));
       $orderitems = array();
       $allasin     = array();
@@ -54,22 +41,10 @@ class MwsController extends \BaseController {
         foreach (array_chunk($orderlist, 10) as $orderlistchunk) {
           foreach ($orderlistchunk as $order) {
             $xmlresp = $this->service->itemsByOrdreId($order->AmazonOrderId);
-            if($this->mode == "developer"){
-              echo "<h1>Item By Order Id $order->AmazonOrderId</h1>";
-              echo "<span>Class Name ".get_class($this)."</span>";
-              echo "<pre>";
-              print_r($xmlresp);
-              echo "</pre>";
-            }
+            $this->logit("Item By Order Id $order->AmazonOrderId", $xmlresp, "Class Name ".get_class($this));
             $resp = json_decode(json_encode($xmlresp), true);
             if(!isset($resp["ListOrderItemsResult"])){
-              if($this->mode == "developer"){
-                echo "<h1>ListOrderItemsResult Not Found in URL</h1>";
-                echo "<span>Class Name ".get_class($this)."</span>";
-                echo "<pre>";
-                print_r($resp);
-                echo "</pre>";
-              }
+              $this->logit("ListOrderItemsResult Not Found in URL", $resp, "Class Name ".get_class($this));
               return;
             }
             $orderitems["".$order->AmazonOrderId] = $resp["ListOrderItemsResult"];
@@ -87,13 +62,8 @@ class MwsController extends \BaseController {
         $uniqueasins = array_unique( $asinlist );
         foreach (array_chunk($uniqueasins, 10) as $asins) {
           $xmlresp = $this->service->productsByIds($asins);
-          if($this->mode == "developer"){
-            echo "<h1>Products By Ids  ".implode(',', $asins)."</h1>";
-            echo "<span>Class Name ".get_class($this)."</span>";
-            echo "<pre>";
-            print_r($xmlresp);
-            echo "</pre>";
-          }
+
+          $this->logit("Products By Ids  ".implode(',', $asins) , $xmlresp, "Class Name ".get_class($this));
           foreach ($xmlresp as $matcheditem) {
 
             $currentasin = "";
@@ -181,13 +151,15 @@ class MwsController extends \BaseController {
     $boxcflaturl = "";
     $pfcfileurl = "";
     $pfcflaturl = "";
-
+    $this->logit("Boxc From Session", $boxc);
+    //return "";
     foreach ($boxc as $key => $value) {
       array_push($boxcCollection,$mainRepo['boxc'][$value]);  
       array_push($boxcFlatfile,$mainRepo['flatfile'][$value]);
       $order = $mainRepo["word"][$value];
       $boxctemp .= '<tr>';
       $boxctemp .= "<td>".$order["OrderID"].'<p></p>'.$value."</td>";
+      $boxctemp .= "<td>".$order["PurchaseDate"].'<p></p>'.$order["EarliestDeliveryDate"].'<p></p>'.$order["OrderType"]."</td>";
 
       if(isset($order["image"])){
         $toarray = json_decode( json_encode($order["image"]) , true);
@@ -221,6 +193,7 @@ class MwsController extends \BaseController {
       $order = $mainRepo["word"][$value];
       $pfctemp .= '<tr>';
       $pfctemp .= "<td>".$order["OrderID"].'<p></p>'.$value."</td>";
+      $pfctemp .= "<td>".$order["PurchaseDate"].'<p></p>'.$order["EarliestDeliveryDate"].'<p></p>'.$order["OrderType"]."</td>";
 
       if(isset($order["image"])){
         $toarray = json_decode( json_encode($order["image"]) , true);
@@ -250,42 +223,15 @@ class MwsController extends \BaseController {
     }
   //Debugging
   if($this->mode == "developer"){
-    echo "<h1>TABBER</h1>";
-    echo "<pre>";
-    print_r($mainRepo);
-    echo "</pre>";
-
-    
-    echo "<h1>Input boxc</h1>";
-    echo "<pre>";
-    print_r($boxc);
-    echo "</pre>";
-
-
-    echo "<h1>BOXC boxCollection</h1>";
-    echo "<pre>";
-    print_r($boxcCollection);
-    echo "</pre>";
-
-    echo "<h1>BOXC Flatfile</h1>";
-    echo "<pre>";
-    print_r($boxcFlatfile);
-    echo "</pre>";
-
-    
-    echo "<h1>Input pfc</h1>";
-    echo "<pre>";
-    print_r($pfc);
-    echo "</pre>";
-        
-    echo "<h1>PFC pfcCollection</h1>";
-    echo "<pre>";
-    print_r($pfcCollection);
-    echo "</pre>";
-    echo "<h1>PFC Flatfile</h1>";
-    echo "<pre>";
-    print_r($pfcFlatFile);
-    echo "</pre>";
+    $this->logit("TABBER", $mainRepo);
+    //BOXC LOGS
+    $this->logit("Input boxc", $boxc);
+    $this->logit("BOXC boxCollection", $boxcCollection);
+    $this->logit("BOXC Flatfile", $boxcFlatfile);
+    //PFC LOGS
+    $this->logit("Input pfc", $pfc);
+    $this->logit("PFC pfcCollection", $pfcCollection);
+    $this->logit("PFC Flatfile", $pfcFlatFile);
   }//Debugging
     if(!empty($boxc)){
       $boxcfile = Excel::create( 'Boxc'.str_random(6), function($excel) use($boxcCollection){
@@ -335,7 +281,7 @@ class MwsController extends \BaseController {
     if($boxctemp != ""){
       $content .= '<h2>BOXC ORDERS</h2>';
       $content .= "<table><thead><tr>";
-      $content .= "<td>Orderid</td><td>image</td><td>QTY</td><td>Name</td><td>Title</td>";
+      $content .= "<td>Orderid</td><td>Purchase Date<p></p>Earliest ShipTime<p></p>OrderType</td><td>image</td><td>QTY</td><td>Name</td><td>Title</td>";
       $content .= "</tr></thead><tbody>";
       $content .= $boxctemp;
       $content .= '</tbody></table>';
@@ -343,7 +289,7 @@ class MwsController extends \BaseController {
     if($pfctemp != ""){
       $content .= '<h2>PFC ORDERS</h2>';
       $content .= "<table><thead><tr>";
-      $content .= "<td>Orderid</td><td>image</td><td>QTY</td><td>Name</td><td>Title</td>";
+      $content .= "<td>Orderid</td><td>Purchase Date<p></p>Earliest ShipTime<p></p>OrderType</td><td>image</td><td>QTY</td><td>Name</td><td>Title</td>";
       $content .= "</tr></thead><tbody>";
       $content .= $pfctemp;
       $content .= '</tbody></table>';
@@ -379,20 +325,23 @@ class MwsController extends \BaseController {
     $orderlist   = json_decode(Session::get('orders'));
     $orderitems = json_decode(Session::get('orderitems'));
     $products   = json_decode(Session::get('products'));
+    // Session::forget('orders');
+    // Session::forget('orderitems');
+    // Session::forget('products');
     foreach($orderlist as $el){
       $id = $el->AmazonOrderId;
       //Cart Single Item Or Multiple Items Checks
       foreach( $orderitems->$id->OrderItems as $orderitem ){
         $OrderedlistTitles = array();
+          $currentasin = "";
+          $asslinlist = array();
+          $OrderedlistQTY = array();
         if(isset($orderitem->Title)){
           // Single Items Added in Cart
           $currentasin = $orderitem->ASIN;
           array_push($OrderedlistTitles,$orderitem->Title);
         }else{
           // Multiple Orders Added in Cart
-          $currentasin = "";
-          $asslinlist = array();
-          $OrderedlistQTY = array();
           foreach( $orderitem as $suborderitem){
             array_push($asslinlist,$suborderitem->ASIN);
             array_push($OrderedlistQTY,$suborderitem->QuantityOrdered);
@@ -400,6 +349,10 @@ class MwsController extends \BaseController {
           }
         }
       }
+      
+      $this->logit("Asslinlist", $asslinlist);
+      $this->logit("Order List QTY", $OrderedlistQTY);
+      $this->logit("OrderedlistTitles",$OrderedlistTitles);
 
       $orderitem = $orderitems->$id;
       $orders = array();
@@ -415,6 +368,7 @@ class MwsController extends \BaseController {
         $wordDoc[$id] = $this->fillword($randOrder,$el,$currentasin,$products,$OrderedlistTitles,$OrderedlistQTY,$asslinlist);
       }
     }//$el
+    //$this->logit("generateBoxc Return", array("boxc"=>$boxc,"pfc"=>$pfc,"flatfile"=>$flat,"word"=>$wordDoc), $class = "generateBoxc");
     return array("boxc"=>$boxc,"pfc"=>$pfc,"flatfile"=>$flat,"word"=>$wordDoc);
   }
 
@@ -505,7 +459,22 @@ class MwsController extends \BaseController {
     }
     $wordDoc["Title"] = implode('<p></p>',$OrderedlistTitles);
     $wordDoc["Name"] =  $el->ShippingAddress->Name;
+    $wordDoc["Name"] =  $el->ShippingAddress->Name;
+    $wordDoc["PurchaseDate"] = $el->PurchaseDate;
+    $wordDoc["EarliestDeliveryDate"] = $el->EarliestDeliveryDate;
+    $wordDoc["OrderType"] = $el->OrderType;
+
     return $wordDoc;
+  }
+
+  public function logit($heading, $msg, $class = "NotMentioned"){
+    if($this->mode == "developer"){
+      echo "<h1>".$heading."</h1>";
+      echo "<h4>".$class."</h4>";
+      echo "<pre>";
+      print_r($msg);
+      echo "</pre>";
+    }
   }
 }
 
