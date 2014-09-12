@@ -379,13 +379,9 @@ class MwsController extends \BaseController {
     $boxc["SKU"] = "";
     $boxc["Service"] = "";
     $boxc["Name"] =  $el->ShippingAddress->Name ;
-    $boxc["Phone"] =  $el->ShippingAddress->Phone ;
-    $boxc["Street1"] =  ( isset($el->ShippingAddress->AddressLine1) )? $el->ShippingAddress->AddressLine1: "" ;
-    if(isset($el->ShippingAddress->AddressLine2)){
-      $boxc["Street2"] =  $el->ShippingAddress->AddressLine2 ;
-    }else{
-      $boxc["Street2"] = "";
-    }
+    $boxc["Phone"] =  ( isset( $el->ShippingAddress->Phone ) )? $el->ShippingAddress->Phone: "";
+    $boxc["Street1"] =  ( isset($el->ShippingAddress->AddressLine1) )? $el->ShippingAddress->AddressLine1: "";
+    $boxc["Street2"] =  ( isset($el->ShippingAddress->AddressLine2) )? $el->ShippingAddress->AddressLine2: "";
     $boxc["City"] =  $el->ShippingAddress->City ;
     $boxc["State"] =  (isset($el->ShippingAddress->StateOrRegion))?$el->ShippingAddress->StateOrRegion: "";
     $boxc["PostalCode"] =  $el->ShippingAddress->PostalCode ;
