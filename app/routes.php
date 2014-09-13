@@ -10,7 +10,7 @@
 | and give it the Closure to execute when that URI is requested.
 |
 */
-
+App::bind('OrdersRepositoryInterface',  'OrderRepository');
 Route::get('/', function()
 {
 	return Redirect::action('CodesController@index');

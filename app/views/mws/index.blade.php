@@ -16,11 +16,22 @@
 		</div>
 	</div>
 	<div class="row-form"><!-- new form row -->
-			<div class="span6"><!-- new form column -->
+			<div class="span3"><!-- new form column -->
+				<span class="top">Account</span><!-- top text line -->
+				<select name="account">
+					<option value="1">ghassanbashir2000@gmail.com</option>
+					<option value="2">xamz2000@stufff.dii</option>
+				</select>
+			</div>
+			<div class="span3"><!-- new form column -->
 				<span class="top">Fetch Orders From</span><!-- top text line -->
 				<input name="from" type="text" class="datepicker" value="{{ date("Y-m-d", mktime(0, 0, 0, date("m"), date("d"), date("Y"))) }}" />	 
 			</div>
-			<div class="span6"><!-- new form column -->
+			<div class="span1"><!-- new form column -->
+				<span class="top">Limit Orders</span><!-- top text line -->
+				<input name="limit" type="number" value="30" style=" width: 40px; "/>	 
+			</div>
+			<div class="span5"><!-- new form column -->
 				<span class="top">Other Details</span><!-- top text line --> 
 				<select name="status">
 					<option value="all">All</option>
@@ -50,23 +61,71 @@
 		@foreach(array_chunk($orders,4) as $order)
 			<div class="row-form">
 				@foreach($order as $el)
-				<?php $i++; ?>
+				<?php
+					$i++; 
+					$str = $el->PurchaseDate;
+					$str = strtotime(date("M d Y")) - (strtotime($str));
+					$days = floor($str/3600/24);
+					$hcolor = "green";
+					if($days >= 2){
+						$hcolor = "dblue";
+					}elseif ($days >= 4) {
+						$hcolor = "yellow";
+					}elseif ($days >= 7) {
+						$hcolor = "red";
+					}
+				?>
 					
 					<div class="span3">
 						<div class="block" id="sWidget_2" style="position: relative;">
-								<div class="head dblue">
+								<div class="head {{ $hcolor }}">
 									<h6>MWS OrderId: {{ $el->AmazonOrderId }}</h6>
 								</div>
 								@if(!empty($el->OrderTotal))
 									<div class="data dark">
+										<input type="checkbox" checked="checked" class="boxcsel" name="boxc[]" value="{{ $el->AmazonOrderId }}">ADD BOXC<br>
+										<input type="checkbox" calss="pfcsel" name="pfc[]" value="{{ $el->AmazonOrderId }}">ADD PFC<br>
+										
+										
 										AmountPaid: {{ $el->OrderTotal->Amount }}<br>
+										Buy date: {{ $el->PurchaseDate }}<br>
+										Order Type: {{ $el->OrderType }}<br>
 										Shipped: {{ $el->NumberOfItemsShipped }} :: Unshipped: {{ $el->NumberOfItemsUnshipped }}<br>
 										@foreach( $orderitems["".$el->AmazonOrderId]["OrderItems"] as $orderitem )
-											<h6>{{ $orderitem["Title"] }}</h6>
-											<h6>Item Price {{ $orderitem["ItemPrice"]["Amount"] }}</h6>
-											<?php $currentasin = $orderitem["ASIN"]; ?>
+											<?php
+												$OrderedlistTitles = array();
+											?>
+											@if(isset($orderitem["Title"]))
+												<!-- Single Items Added in Cart -->
+												<h6>{{ $orderitem["Title"] }}</h6>
+												<h6>Item Price {{ $orderitem["ItemPrice"]["Amount"] }}</h6>
+												<?php 
+													$currentasin = $orderitem["ASIN"];
+													array_push($OrderedlistTitles,$orderitem["Title"]);
+												?>
+												<img src={{ $products["".$currentasin]["image"] }} >
+											@else
+												<!-- Multiple Orders Added in Cart -->
+												<?php 
+													$currentasin = "";
+													$asslinlist = array();
+													$OrderedlistQTY = array();
+												?>
+												@foreach( $orderitem as $suborderitem)
+													<h6>{{ $suborderitem["Title"] }}</h6>
+													<h6>Item Price {{ $suborderitem["ItemPrice"]["Amount"] }}</h6>
+													<h6>QuantityOrdered {{ $suborderitem["QuantityOrdered"] }}</h6>
+													<?php
+													 array_push($asslinlist,$suborderitem["ASIN"]);
+													 array_push($OrderedlistQTY,$suborderitem["QuantityOrdered"]);
+													 array_push($OrderedlistTitles,$suborderitem["Title"]);
+													?>
+												@endforeach
+													@foreach( $asslinlist as $singleasin)
+														<img src={{ $products["".$singleasin]["image"] }} >
+													@endforeach
+											@endif
 										@endforeach
-										<img src={{ $products["".$currentasin]["image"] }} >
 										<a href="#{{ $el->AmazonOrderId }}" role="button" class="btn" data-toggle="modal">OverView</a>
 									</div>
 								@endif
@@ -74,7 +133,7 @@
 					</div>
 					<div id="{{ $el->AmazonOrderId }}" class="modal hide fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
 						<div class="modal-header">
-								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
 								<h3 id="myModalLabel">{{ $el->AmazonOrderId }}</h3>
 						</div>
 						<div class="modal-body">
@@ -96,80 +155,17 @@
 								 	<pre>
 								 		{{ print_r( $orderitems["".$el->AmazonOrderId] ) }}
 								 	</pre><hr>
-								 	<pre>
-								 		{{ print_r( $products["".$currentasin] ) }}
-								 	</pre>
-								 	<?php $randOrder = str_random(6); ?>
-<input type="hidden" name="order[{{ $randOrder }}][CompanyID]" value="838">
-<input type="hidden" name="order[{{ $randOrder }}][OrderID]" value="{{ $randOrder }}">
-<input type="hidden" name="order[{{ $randOrder }}][SKU]" value="">
-<input type="hidden" name="order[{{ $randOrder }}][Service]" value="">
-<input type="hidden" name="order[{{ $randOrder }}][Name]" value="{{ $el->ShippingAddress->Name }}">
-<input type="hidden" name="order[{{ $randOrder }}][Phone]" value="{{ $el->ShippingAddress->Phone }}">
-<input type="hidden" name="order[{{ $randOrder }}][Street1]" value="{{ $el->ShippingAddress->AddressLine1 }}">
-<input type="hidden" name="order[{{ $randOrder }}][Street2]" value="{{ $el->ShippingAddress->AddressLine2 }}">
-<input type="hidden" name="order[{{ $randOrder }}][City]" value="{{ $el->ShippingAddress->City }}">
-<input type="hidden" name="order[{{ $randOrder }}][State]" value="{{ $el->ShippingAddress->StateOrRegion }}">
-<input type="hidden" name="order[{{ $randOrder }}][PostalCode]" value="{{ $el->ShippingAddress->PostalCode }}">
-<input type="hidden" name="order[{{ $randOrder }}][Contents]" value="">
-<input type="hidden" name="order[{{ $randOrder }}][Items]" value="{{ $el->NumberOfItemsUnshipped }}">
-<input type="hidden" name="order[{{ $randOrder }}][Value]" value="{{ $orderitem['ItemPrice']['Amount'] }}">
-<input type="hidden" name="order[{{ $randOrder }}][SignatureConfirmation]" value="0">
-<input type="hidden" name="order[{{ $randOrder }}][Units]" value="Metric">
-<input type="hidden" name="order[{{ $randOrder }}][Weight]" value="{{ $products[''.$currentasin]['weight'] }}">
-<input type="hidden" name="order[{{ $randOrder }}][Height]" value="{{ $products[''.$currentasin]['height'] }}">
-<input type="hidden" name="order[{{ $randOrder }}][Width]" value="{{ $products[''.$currentasin]['width'] }}">
-<input type="hidden" name="order[{{ $randOrder }}][Depth]" value="1">
-
-
-
-<input type="hidden" name="pfc[{{ $randOrder }}][Sales Record Number]" value="{{ $randOrder }}">
-<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Fullname]" value="{{ $el->ShippingAddress->Name }}">
-<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Company]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Address 1]" value="{{ $el->ShippingAddress->AddressLine1 }}">
-<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Address 2]" value="{{ $el->ShippingAddress->AddressLine2 }}">
-<input type="hidden" name="pfc[{{ $randOrder }}][Buyer City]" value="{{ $el->ShippingAddress->City }}">
-<input type="hidden" name="pfc[{{ $randOrder }}][Buyer State]" value="{{ $el->ShippingAddress->StateOrRegion }}">
-<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Zip]" value="{{ $el->ShippingAddress->PostalCode }}">
-<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Phone Number]" value="{{ $el->ShippingAddress->Phone }}">
-<input type="hidden" name="pfc[{{ $randOrder }}][Buyer Country]" value="{{ $el->ShippingAddress->CountryCode }}">
-<input type="hidden" name="pfc[{{ $randOrder }}][SKU]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Description EN]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Description CN]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][HS Code]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Quantity]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Sale Price]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Country of Manufacture]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Mark]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][weight]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Length]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Width]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Height]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][Shipping Service]" value="">
-<input type="hidden" name="pfc[{{ $randOrder }}][TrackingNo]" value="">
-																							
-
-<input type="hidden" name="maporder[{{ $randOrder }}][OrderID]" value="{{ $randOrder }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][image]" value="{{ $products["".$currentasin]['smallimage'] }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][Items]" value="{{ $el->NumberOfItemsUnshipped }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][PostalCode]" value="{{ $el->ShippingAddress->PostalCode }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][StateCity]" value="{{ $el->ShippingAddress->StateOrRegion }}::{{ $el->ShippingAddress->City }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][Streets]" value="{{ $el->ShippingAddress->AddressLine1 }}::{{ $el->ShippingAddress->AddressLine2 }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][Phone]" value="{{ $el->ShippingAddress->Phone }}">
-<input type="hidden" name="maporder[{{ $randOrder }}][Name]" value="{{ $el->ShippingAddress->Name }}">
-
-
-<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][order-id]" value="{{ $el->AmazonOrderId }}">
-<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][order-item-id]" value="">
-<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][quantity]" value="">
-<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][ship-date]" value="{{  date('Y-m-d') }}">
-<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][carrier-code]" value="">
-<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][carrier-name]" value="">
-<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][tracking-number]" value="{{ $randOrder }}">
-<input type="hidden" name="shipmentconfirmation[{{ $randOrder }}][ship-method]" value="">
-							
-
-
+								 	@if($currentasin != "")
+									 	<pre>
+									 		{{ print_r( $products["".$currentasin] ) }}
+									 	</pre>
+									@else
+										@foreach( $asslinlist as $singleasin)
+											<pre>
+										 		{{ print_r( $products["".$singleasin] ) }}
+										 	</pre>
+										@endforeach
+									@endif
 							 	@endif
 						</div>
 				</div>
@@ -188,6 +184,7 @@
 	</div><!-- .block-fluid -->
 </div><!-- .content -->
 @endif
+
 {{ Form::close() }}
 @stop
 
